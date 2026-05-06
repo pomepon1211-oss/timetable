@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時間割 2026年6月</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+  :root {
+    --blue-bg:#E6F1FB;--blue-bd:#B5D4F4;--blue-tx:#0C447C;
+    --green-bg:#EAF3DE;--green-tx:#3B6D11;
+    --surface:#fff;--page:#f4f6fb;--text:#1a1a2e;--muted:#6b7280;--bdr:rgba(0,0,0,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--page);padding:12px 8px 40px;color:var(--text)}
+  h1{text-align:center;font-size:17px;font-weight:700;color:var(--blue-tx);margin-bottom:14px}
+  .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .nav button{background:var(--surface);border:1px solid var(--bdr);border-radius:10px;padding:7px 13px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text)}
+  .nav button:hover{background:var(--blue-bg);color:var(--blue-tx)}
+  .nav button:disabled{opacity:.3;cursor:default}
+  .wlabel{font-size:13px;font-weight:700;text-align:center;flex:1}
+  .grid{display:grid;gap:3px}
+  .dh{font-size:10px;font-weight:700;text-align:center;padding:4px 2px;border-radius:8px;color:var(--muted);line-height:1.4}
+  .dh.today{background:var(--blue-bg);color:var(--blue-tx)}
+  .tl{font-size:8px;color:var(--muted);text-align:right;padding-right:3px;line-height:1.4;display:flex;flex-direction:column;justify-content:center}
+  .cell{min-height:68px;border-radius:10px;padding:5px 5px 4px;font-size:10px;font-weight:500;line-height:1.35;display:flex;flex-direction:column;gap:3px}
+  .cell.tap{cursor:pointer;transition:transform .12s}
+  .cell.tap:active{transform:scale(.97)}
+  .cell.empty{background:rgba(0,0,0,.04)}
+  .cell.normal{background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted)}
+  .ld{width:10px;height:10px;border-radius:3px}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+  .modal{background:var(--surface);border-radius:16px;padding:20px;width:100%;max-width:320px}
+  .modal h2{font-size:16px;font-weight:700;margin-bottom:12px}
+  .mrow{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted);margin-bottom:6px;line-height:1.5}
+  .mst{margin-top:10px;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;text-align:center;background:var(--green-bg);color:var(--green-tx)}
+  .mcls{margin-top:14px;width:100%;padding:10px;border:1px solid var(--bdr);background:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text)}
+  .mcls:hover{background:var(--page)}
+</style>
+</head>
+<body>
+<h1>📅 時間割 2026年6月</h1>
+<div class="nav">
+  <button id="bp" onclick="go(-1)">‹ 前週</button>
+  <div class="wlabel" id="wl"></div>
+  <button id="bn" onclick="go(1)">次週 ›</button>
+</div>
+<div class="grid" id="grid"></div>
+<div class="legend">
+  <div class="li"><div class="ld" style="background:var(--blue-bg);border:1px solid var(--blue-bd)"></div>通常授業</div>
+</div>
+<div id="ov" style="display:none" class="overlay" onclick="if(event.target===this)cm()">
+  <div class="modal">
+    <h2 id="mt"></h2>
+    <div class="mrow"><span>📅</span><span id="md"></span></div>
+    <div class="mrow"><span>⏰</span><span id="mti"></span></div>
+    <div class="mst">🟢 通常通り実施</div>
+    <button class="mcls" onclick="cm()">閉じる</button>
+  </div>
+</div>
+
+<script>
+const DN=['月','火','水','木','金'];
+const TM={
+  '09:00':{l:'1限',t:'09:00〜10:30'},
+  '10:40':{l:'2限',t:'10:40〜12:10'},
+  '13:25':{l:'3限',t:'13:25〜14:55'},
+  '15:05':{l:'4限',t:'15:05〜16:35'},
+  '16:45':{l:'5限',t:'16:45〜18:15'},
+  '18:25':{l:'6限',t:'18:25〜19:55'},
+};
+const PO=['09:00','10:40','13:25','15:05','16:45','18:25'];
+
+const WEEKS=[
+  {
+    label:'6/1（月）〜 6/5（金）',
+    monday:'2026-06-01',
+    days:[
+      {date:'2026-06-01',classes:[
+        {time:'13:25',subj:'人間の発達と心理'},
+        {time:'16:45',subj:'法学'},
+      ]},
+      {date:'2026-06-02',classes:[]},
+      {date:'2026-06-03',classes:[
+        {time:'09:00',subj:'体育'},
+        {time:'13:25',subj:'基礎看護方法論I'},
+        {time:'15:05',subj:'基礎看護方法論I'},
+        {time:'16:45',subj:'中国の言語と文化'},
+      ]},
+      {date:'2026-06-04',classes:[
+        {time:'10:40',subj:'Practical English 1'},
+        {time:'13:25',subj:'科学の基礎(8)'},
+      ]},
+      {date:'2026-06-05',classes:[
+        {time:'09:00',subj:'健康と栄養'},
+        {time:'10:40',subj:'キリスト数学I'},
+        {time:'13:25',subj:'ヒューマンケア'},
+        {time:'15:05',subj:'看護学概論'},
+        {time:'16:45',subj:'法学'},
+      ]},
+    ]
+  },
+  {
+    label:'6/8（月）〜 6/12（金）',
+    monday:'2026-06-08',
+    days:[
+      {date:'2026-06-08',classes:[
+        {time:'13:25',subj:'人間の発達と心理'},
+        {time:'16:45',subj:'法学'},
+      ]},
+      {date:'2026-06-09',classes:[
+        {time:'09:00',subj:'形態機能学II'},
+        {time:'10:40',subj:'形態機能学II'},
+      ]},
+      {date:'2026-06-10',classes:[
+        {time:'09:00',subj:'体育'},
+        {time:'13:25',subj:'基礎看護方法論I'},
+        {time:'15:05',subj:'基礎看護方法論I'},
+        {time:'16:45',subj:'中国の言語と文化'},
+      ]},
+      {date:'2026-06-11',classes:[
+        {time:'10:40',subj:'Practical English 1'},
+        {time:'13:25',subj:'科学の基礎(8)'},
+        {time:'15:05',subj:'形態機能学II'},
+        {time:'16:45',subj:'形態機能学II'},
+      ]},
+      {date:'2026-06-12',classes:[
+        {time:'09:00',subj:'健康と栄養'},
+        {time:'10:40',subj:'キリスト数学I'},
+        {time:'13:25',subj:'ヒューマンケア'},
+        {time:'15:05',subj:'看護学概論'},
+      ]},
+    ]
+  },
+  {
+    label:'6/15（月）〜 6/19（金）',
+    monday:'2026-06-15',
+    days:[
+      {date:'2026-06-15',classes:[
+        {time:'16:45',subj:'法学'},
+      ]},
+      {date:'2026-06-16',classes:[
+        {time:'09:00',subj:'形態機能学II'},
+        {time:'10:40',subj:'形態機能学II'},
+      ]},
+      {date:'2026-06-17',classes:[
+        {time:'09:00',subj:'体育'},
+        {time:'13:25',subj:'基礎看護方法論I'},
+        {time:'15:05',subj:'基礎看護方法論I'},
+        {time:'16:45',subj:'中国の言語と文化'},
+      ]},
+      {date:'2026-06-18',classes:[
+        {time:'10:40',subj:'Practical English 1'},
+        {time:'13:25',subj:'科学の基礎(8)'},
+      ]},
+      {date:'2026-06-19',classes:[
+        {time:'09:00',subj:'健康と栄養'},
+        {time:'10:40',subj:'キリスト数学I'},
+        {time:'13:25',subj:'ヒューマンケア'},
+        {time:'15:05',subj:'看護学概論'},
+        {time:'16:45',subj:'中国の言語と文化'},
+      ]},
+    ]
+  },
+  {
+    label:'6/22（月）〜 6/26（金）',
+    monday:'2026-06-22',
+    days:[
+      {date:'2026-06-22',classes:[
+        {time:'16:45',subj:'法学'},
+      ]},
+      {date:'2026-06-23',classes:[
+        {time:'09:00',subj:'形態機能学II'},
+        {time:'10:40',subj:'形態機能学II'},
+      ]},
+      {date:'2026-06-24',classes:[
+        {time:'09:00',subj:'体育'},
+        {time:'16:45',subj:'基礎看護方法論I'},
+        {time:'16:45',subj:'中国の言語と文化'},
+        {time:'18:25',subj:'基礎看護方法論I'},
+      ]},
+      {date:'2026-06-25',classes:[
+        {time:'10:40',subj:'Practical English 1'},
+        {time:'13:25',subj:'科学の基礎(8)'},
+      ]},
+      {date:'2026-06-26',classes:[
+        {time:'10:40',subj:'キリスト数学I'},
+        {time:'13:25',subj:'ヒューマンケア'},
+        {time:'15:05',subj:'看護学概論'},
+        {time:'18:25',subj:'科学の基礎(8)'},
+        {time:'18:25',subj:'健康と栄養'},
+      ]},
+    ]
+  },
+  {
+    label:'6/29（月）〜 6/30（火）',
+    monday:'2026-06-29',
+    days:[
+      {date:'2026-06-29',classes:[]},
+      {date:'2026-06-30',classes:[
+        {time:'09:00',subj:'形態機能学II'},
+        {time:'10:40',subj:'形態機能学II'},
+      ]},
+    ]
+  },
+];
+
+const today=new Date();
+function ds(d){return d.toISOString().slice(0,10)}
+
+let wi=0;
+WEEKS.forEach((w,i)=>{
+  const m=new Date(w.monday);
+  const f=new Date(m);f.setDate(f.getDate()+6);
+  if(today>=m&&today<=f) wi=i;
+});
+
+function render(){
+  const w=WEEKS[wi];
+  document.getElementById('wl').textContent=w.label;
+  document.getElementById('bp').disabled=wi===0;
+  document.getElementById('bn').disabled=wi===WEEKS.length-1;
+
+  const active=w.days.filter(d=>{
+    const dow=new Date(d.date).getDay();
+    return dow>=1&&dow<=5;
+  });
+
+  const allT=new Set();
+  active.forEach(d=>d.classes.forEach(c=>allT.add(c.time)));
+  const periods=PO.filter(t=>allT.has(t));
+
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  g.style.gridTemplateColumns=`32px repeat(${active.length},1fr)`;
+
+  g.appendChild(document.createElement('div'));
+  active.forEach(d=>{
+    const dt=new Date(d.date);
+    const el=document.createElement('div');
+    el.className='dh'+(ds(dt)===ds(today)?' today':'');
+    el.innerHTML=`${DN[dt.getDay()-1]}<br>${dt.getMonth()+1}/${dt.getDate()}`;
+    g.appendChild(el);
+  });
+
+  if(periods.length===0){
+    const msg=document.createElement('div');
+    msg.style.cssText='grid-column:1/-1;text-align:center;padding:24px;color:var(--muted);font-size:13px;';
+    msg.textContent='授業はありません';
+    g.appendChild(msg);
+    return;
+  }
+
+  periods.forEach(t=>{
+    const tl=document.createElement('div');
+    tl.className='tl';
+    const tm=TM[t]||{l:'',t};
+    tl.innerHTML=`${tm.l}<br>${t}`;
+    g.appendChild(tl);
+
+    active.forEach(d=>{
+      const clsList=d.classes.filter(c=>c.time===t);
+      const el=document.createElement('div');
+      if(clsList.length===0){
+        el.className='cell empty';
+      } else {
+        el.className='cell normal tap';
+        el.innerHTML=clsList.map(c=>`<span>${c.subj}</span>`).join('');
+        el.onclick=()=>sm(clsList.map(c=>c.subj).join('・'),t,d.date);
+      }
+      g.appendChild(el);
+    });
+  });
+}
+
+function sm(subj,time,date){
+  const dt=new Date(date);
+  const tm=TM[time]||{l:'',t:time};
+  document.getElementById('mt').textContent=subj;
+  document.getElementById('md').textContent=`${dt.getMonth()+1}月${dt.getDate()}日（${DN[dt.getDay()-1]}）`;
+  document.getElementById('mti').textContent=`${tm.l}　${tm.t}`;
+  document.getElementById('ov').style.display='flex';
+}
+function cm(){document.getElementById('ov').style.display='none'}
+function go(n){wi+=n;render()}
+render();
+</script>
+</body>
+</html>

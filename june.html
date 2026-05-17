@@ -9,6 +9,7 @@
   :root {
     --blue-bg:#E6F1FB;--blue-bd:#B5D4F4;--blue-tx:#0C447C;
     --green-bg:#EAF3DE;--green-tx:#3B6D11;
+    --other-bg:#F3EDFB;--other-bd:#C9A8F0;--other-tx:#5B2D8E;
     --surface:#fff;--page:#f4f6fb;--text:#1a1a2e;--muted:#6b7280;--bdr:rgba(0,0,0,0.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -38,6 +39,46 @@
   .mst{margin-top:10px;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;text-align:center;background:var(--green-bg);color:var(--green-tx)}
   .mcls{margin-top:14px;width:100%;padding:10px;border:1px solid var(--bdr);background:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--text)}
   .mcls:hover{background:var(--page)}
+
+/* その他行 */
+.other-row-label{
+  font-size:8px;color:var(--other-tx);text-align:right;
+  padding-right:3px;line-height:1.4;
+  display:flex;flex-direction:column;justify-content:center;
+  font-weight:700;
+}
+.other-cell{
+  background:var(--other-bg);
+  border:1px solid var(--other-bd);
+  border-radius:10px;
+  padding:4px 5px;
+  min-height:52px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.other-cell textarea{
+  width:100%;
+  flex:1;
+  min-height:36px;
+  border:none;
+  background:transparent;
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:9px;
+  color:var(--other-tx);
+  resize:none;
+  outline:none;
+  line-height:1.4;
+}
+.other-cell textarea::placeholder{
+  color:var(--other-bd);
+}
+.other-cell-label{
+  font-size:8px;
+  font-weight:700;
+  color:var(--other-tx);
+  opacity:0.7;
+}
 </style>
 </head>
 <body>
@@ -50,6 +91,7 @@
 <div class="grid" id="grid"></div>
 <div class="legend">
   <div class="li"><div class="ld" style="background:var(--blue-bg);border:1px solid var(--blue-bd)"></div>通常授業</div>
+  <div class="li"><div class="ld" style="background:var(--other-bg);border:1px solid var(--other-bd)"></div>その他</div>
 </div>
 <div id="ov" style="display:none" class="overlay" onclick="if(event.target===this)cm()">
   <div class="modal">
@@ -217,6 +259,39 @@ WEEKS.forEach((w,i)=>{
   if(today>=m&&today<=f) wi=i;
 });
 
+// localStorage にその他メモを保存・読み込み
+function saveOther(date,val){
+  localStorage.setItem('other_'+date, val);
+}
+function loadOther(date){
+  return localStorage.getItem('other_'+date)||'';
+}
+
+function appendOtherRow(g, active){
+  const lbl=document.createElement('div');
+  lbl.className='other-row-label';
+  lbl.innerHTML='その他<br>メモ';
+  g.appendChild(lbl);
+
+  active.forEach(d=>{
+    const cell=document.createElement('div');
+    cell.className='other-cell';
+
+    const cellLabel=document.createElement('div');
+    cellLabel.className='other-cell-label';
+    cellLabel.textContent='📝 その他';
+    cell.appendChild(cellLabel);
+
+    const ta=document.createElement('textarea');
+    ta.placeholder='予定を入力…';
+    ta.value=loadOther(d.date);
+    ta.addEventListener('input',()=>saveOther(d.date, ta.value));
+    cell.appendChild(ta);
+
+    g.appendChild(cell);
+  });
+}
+
 function render(){
   const w=WEEKS[wi];
   document.getElementById('wl').textContent=w.label;
@@ -250,6 +325,7 @@ function render(){
     msg.style.cssText='grid-column:1/-1;text-align:center;padding:24px;color:var(--muted);font-size:13px;';
     msg.textContent='授業はありません';
     g.appendChild(msg);
+    appendOtherRow(g, active);
     return;
   }
 
@@ -273,6 +349,9 @@ function render(){
       g.appendChild(el);
     });
   });
+
+  // その他行を最後に追加
+  appendOtherRow(g, active);
 }
 
 function sm(subj,time,date){

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)file:///Users/pomeponta/Downloads/index.html -->
-<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>時間割 2026年6月〜7月</title>
 <style>
@@ -11,6 +11,7 @@
 --green-bg:#EAF3DE;--green-tx:#3B6D11;
 --other-bg:#F3EDFB;--other-bd:#C9A8F0;--other-tx:#5B2D8E;
 --remote-bg:#FFF1E0;--remote-bd:#EDA94A;--remote-tx:#9A5512;
+--exam-bg:#FDE7EA;--exam-bd:#E58A99;--exam-tx:#8E2433;
 --surface:#fff;--page:#f4f6fb;--text:#1a1a2e;--muted:#6b7280;--bdr:rgba(0,0,0,0.08);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -34,6 +35,14 @@ h1{text-align:center;font-size:17px;font-weight:700;color:var(--blue-tx);margin-
 .cell.normal{background:var(--blue-bg);color:var(--blue-tx);border:1px solid var(--blue-bd)}
 .cell.remote{background:var(--remote-bg);color:var(--remote-tx);border:2px solid var(--remote-bd)}
 .rtag{font-size:8px;font-weight:700;opacity:.9}
+.cell.exam{background:var(--exam-bg);color:var(--exam-tx);border:1px solid var(--exam-bd);min-height:78px}
+.etag{font-size:8px;font-weight:700;opacity:.9}
+.esubj{font-size:10px;font-weight:700;line-height:1.3}
+.emeta{font-size:9px;font-weight:600}
+.emeta2{font-size:8px;opacity:.85;line-height:1.3}
+.dh.examdh{background:var(--exam-bg);color:var(--exam-tx)}
+.exambanner{background:var(--exam-bg);color:var(--exam-tx);border:1px solid var(--exam-bd);border-radius:10px;padding:7px 10px;font-size:11px;font-weight:700;text-align:center;margin-bottom:10px;line-height:1.6}
+.exambtn{background:var(--exam-bg)!important;border-color:var(--exam-bd)!important;color:var(--exam-tx)!important}
 .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted)}
 .ld{width:10px;height:10px;border-radius:3px}
@@ -55,14 +64,16 @@ h1{text-align:center;font-size:17px;font-weight:700;color:var(--blue-tx);margin-
 <h1>📅 時間割 2026年6月〜7月</h1>
 <div class="nav">
 <button id="bp" onclick="go(-1)">‹ 前週</button>
-<div class="wlabel" id="wl">6/15（月）〜 6/19（金）</div>
+<div class="wlabel" id="wl"></div>
 <button id="bn" onclick="go(1)">次週 ›</button>
 </div>
-<div class="todaybar"><button onclick="goToday()">今週へ戻る</button></div>
-<div class="grid" id="grid" style="grid-template-columns: 32px repeat(5, 1fr);"><div></div><div class="dh today">月<br>6/15</div><div class="dh">火<br>6/16</div><div class="dh">水<br>6/17</div><div class="dh">木<br>6/18</div><div class="dh">金<br>6/19</div><div class="tl">1限<br>09:00</div><div class="cell empty"></div><div class="cell normal tap"><span>形態機能学II</span></div><div class="cell normal tap"><span>体育</span></div><div class="cell empty"></div><div class="cell normal tap"><span>健康と栄養</span></div><div class="tl">2限<br>10:40</div><div class="cell empty"></div><div class="cell normal tap"><span>形態機能学II</span></div><div class="cell empty"></div><div class="cell normal tap"><span>Practical English 1</span></div><div class="cell normal tap"><span>キリスト数学I</span></div><div class="tl">3限<br>13:25</div><div class="cell empty"></div><div class="cell empty"></div><div class="cell normal tap"><span>基礎看護方法論I</span></div><div class="cell normal tap"><span>科学の基礎(8)</span></div><div class="cell normal tap"><span>ヒューマンケア</span></div><div class="tl">4限<br>15:05</div><div class="cell empty"></div><div class="cell empty"></div><div class="cell normal tap"><span>基礎看護方法論I</span></div><div class="cell empty"></div><div class="cell normal tap"><span>看護学概論</span></div><div class="tl">5限<br>16:45</div><div class="cell normal tap"><span>法学</span></div><div class="cell empty"></div><div class="cell normal tap"><span>中国の言語と文化</span></div><div class="cell empty"></div><div class="cell normal tap"><span>中国の言語と文化</span></div><div class="other-row-label">その他<br>メモ</div><div class="other-cell"><div class="other-cell-label">📝 その他</div><textarea placeholder="予定を入力…"></textarea></div><div class="other-cell"><div class="other-cell-label">📝 その他</div><textarea placeholder="予定を入力…"></textarea></div><div class="other-cell"><div class="other-cell-label">📝 その他</div><textarea placeholder="予定を入力…"></textarea></div><div class="other-cell"><div class="other-cell-label">📝 その他</div><textarea placeholder="予定を入力…"></textarea></div><div class="other-cell"><div class="other-cell-label">📝 その他</div><textarea placeholder="予定を入力…"></textarea></div></div>
+<div class="todaybar"><button onclick="goToday()">今週へ戻る</button> <button class="exambtn" onclick="goExam()">📝 試験へ</button></div>
+<div class="exambanner" id="exambanner" style="display:none">📝 試験期間 ・ 会場：201教室（音楽は講堂）<br>期間中はチャイム・チャペルなし／再履修科目は要確認</div>
+<div class="grid" id="grid"></div>
 <div class="legend">
 <div class="li"><div class="ld" style="background:var(--blue-bg);border:1px solid var(--blue-bd)"></div>通常授業</div>
-<div class="li"><div class="ld" style="background:var(--remote-bg);border:2px solid var(--remote-bd)"></div>💻 オンライン</div>
+<div class="li"><div class="ld" style="background:var(--remote-bg);border:2px solid var(--remote-bd)"></div>💻 リモート</div>
+<div class="li"><div class="ld" style="background:var(--exam-bg);border:1px solid var(--exam-bd)"></div>📝 試験</div>
 <div class="li"><div class="ld" style="background:var(--other-bg);border:1px solid var(--other-bd)"></div>その他</div>
 </div>
 <div id="ov" style="display:none" class="overlay" onclick="if(event.target===this)cm()">
@@ -189,8 +200,9 @@ days:[
 ]},
 {date:'2026-06-24',classes:[
 {time:'09:00',subj:'体育'},
+{time:'16:45',subj:'基礎看護方法論I'},
 {time:'16:45',subj:'中国の言語と文化'},
-{time:'18:25',subj:'基礎看護方法論I',remote:true},
+{time:'18:25',subj:'基礎看護方法論I'},
 ]},
 {date:'2026-06-25',classes:[
 {time:'10:40',subj:'Practical English 1'},
@@ -292,6 +304,43 @@ days:[
 ]},
 ]
 },
+{
+label:'【試験①】7/22（水）〜 7/24（金）',
+monday:'2026-07-20',
+exam:true,
+days:[
+{date:'2026-07-22',classes:[
+{time:'13:10',end:'14:40',subj:'ヒューマンケアリング論I（基礎）',dur:'90分',room:'201教室'},
+{time:'15:00',end:'16:30',subj:'キリスト教学I（キリスト教概論）',dur:'90分',room:'201教室'},
+{time:'16:50',end:'18:20',subj:'中国の言語と文化',dur:'90分',room:'201教室',elective:true},
+]},
+{date:'2026-07-23',classes:[
+{time:'10:50',end:'11:50',subj:'健康と栄養',dur:'60分',room:'201教室'},
+{time:'13:10',end:'14:10',subj:'科学の基礎',dur:'60分',room:'201教室'},
+]},
+{date:'2026-07-24',classes:[
+{time:'10:50',end:'11:50',subj:'基礎看護学方法論I（生活援助技術）',dur:'60分',room:'201教室'},
+{time:'13:10',end:'14:10',subj:'看護学概論',dur:'60分',room:'201教室'},
+{time:'14:30',end:'16:00',subj:'音楽I（基礎）',dur:'90分',room:'講堂',elective:true},
+]},
+]
+},
+{
+label:'【試験②】7/27（月）〜 7/28（火）／7/29（水）は試験予備日',
+monday:'2026-07-27',
+exam:true,
+days:[
+{date:'2026-07-27',classes:[
+{time:'13:10',end:'14:10',subj:'体育（A・Bクラス合同）',dur:'60分',room:'201教室',elective:true},
+{time:'14:30',end:'15:30',subj:'韓国の言語と文化',dur:'60分',room:'201教室',elective:true},
+{time:'15:50',end:'17:20',subj:'法学（日本国憲法を含む）',dur:'90分',room:'201教室',elective:true},
+]},
+{date:'2026-07-28',classes:[
+{time:'09:30',end:'10:30',subj:'形態機能学II',dur:'60分',room:'201教室'},
+{time:'10:50',end:'11:50',subj:'経済と社会の基礎（社会人入門）',dur:'60分',room:'201教室',elective:true},
+]},
+]
+},
 ];
 
 const today=new Date();
@@ -306,6 +355,7 @@ if(today>=m&&today<=f) idx=i;
 return idx;
 }
 let wi=currentWeek();
+const examIndex=WEEKS.findIndex(w=>w.exam);
 
 function saveOther(date,val){localStorage.setItem('other_'+date,val)}
 function loadOther(date){return localStorage.getItem('other_'+date)||''}
@@ -315,6 +365,7 @@ const w=WEEKS[wi];
 document.getElementById('wl').textContent=w.label;
 document.getElementById('bp').disabled=wi===0;
 document.getElementById('bn').disabled=wi===WEEKS.length-1;
+document.getElementById('exambanner').style.display=w.exam?'block':'none';
 
 const active=w.days.filter(d=>{
 const dow=new Date(d.date).getDay();
@@ -322,8 +373,8 @@ return (dow>=1&&dow<=5)||(dow===6&&d.classes.length>0);
 });
 
 const allT=new Set();
-active.forEach(d=>d.classes.forEach(c=>allT.add(c.time)));
-const periods=PO.filter(t=>allT.has(t));
+active.forEach(d=>d.classes.forEach(c=>{if(c.time)allT.add(c.time)}));
+const periods=[...allT].sort();
 
 const g=document.getElementById('grid');
 g.innerHTML='';
@@ -333,7 +384,7 @@ g.appendChild(document.createElement('div'));
 active.forEach(d=>{
 const dt=new Date(d.date);
 const el=document.createElement('div');
-el.className='dh'+(ds(dt)===ds(today)?' today':'');
+el.className='dh'+(ds(dt)===ds(today)?' today':'')+(w.exam?' examdh':'');
 el.innerHTML=`${DN[dt.getDay()-1]}<br>${dt.getMonth()+1}/${dt.getDate()}`;
 g.appendChild(el);
 });
@@ -351,17 +402,24 @@ periods.forEach(t=>{
 const tl=document.createElement('div');
 tl.className='tl';
 const tm=TM[t]||{l:'',t};
-tl.innerHTML=`${tm.l}<br>${t}`;
+tl.innerHTML=w.exam?t:`${tm.l}<br>${t}`;
 g.appendChild(tl);
 active.forEach(d=>{
 const clsList=d.classes.filter(c=>c.time===t);
 const el=document.createElement('div');
 if(clsList.length===0){
 el.className='cell empty';
+} else if(w.exam){
+const c=clsList[0];
+el.className='cell exam tap';
+const roomTxt=c.room&&c.room!=='201教室'?'・'+c.room:'';
+const elec=c.elective?'・●選択':'';
+el.innerHTML=`<span class="etag">📝 試験</span><span class="esubj">${c.subj}</span><span class="emeta">${c.time}〜${c.end}</span><span class="emeta2">${c.dur}${roomTxt}${elec}</span>`;
+el.onclick=()=>smExam(c,d.date);
 } else {
-const isRemote=clsList.length>=2||clsList.some(c=>c.remote);
+const isRemote=clsList.length>=2;
 el.className='cell '+(isRemote?'remote':'normal')+' tap';
-const tag=isRemote?'<span class="rtag">💻 オンライン</span>':'';
+const tag=isRemote?'<span class="rtag">💻 リモート</span>':'';
 el.innerHTML=tag+clsList.map(c=>`<span>${c.subj}</span>`).join('');
 el.onclick=()=>sm(clsList.map(c=>c.subj).join('・'),t,d.date,isRemote);
 }
@@ -400,15 +458,26 @@ document.getElementById('mt').textContent=subj;
 document.getElementById('md').textContent=`${dt.getMonth()+1}月${dt.getDate()}日（${DN[dt.getDay()-1]}）`;
 document.getElementById('mti').textContent=`${tm.l} ${tm.t}`;
 const st=document.getElementById('mst');
-if(remote){st.textContent='💻 オンライン授業';st.style.background='var(--remote-bg)';st.style.color='var(--remote-tx)';}
+if(remote){st.textContent='💻 リモート授業';st.style.background='var(--remote-bg)';st.style.color='var(--remote-tx)';}
 else{st.textContent='🟢 通常通り実施';st.style.background='var(--green-bg)';st.style.color='var(--green-tx)';}
+document.getElementById('ov').style.display='flex';
+}
+function smExam(c,date){
+const dt=new Date(date);
+document.getElementById('mt').textContent=c.subj;
+document.getElementById('md').textContent=`${dt.getMonth()+1}月${dt.getDate()}日（${DN[dt.getDay()-1]}）`;
+document.getElementById('mti').textContent=`${c.time}〜${c.end}（${c.dur}）`;
+const st=document.getElementById('mst');
+const room=c.room||'201教室';
+st.textContent='📝 試験・'+room+(c.elective?'（選択科目）':'');
+st.style.background='var(--exam-bg)';st.style.color='var(--exam-tx)';
 document.getElementById('ov').style.display='flex';
 }
 function cm(){document.getElementById('ov').style.display='none'}
 function go(n){wi+=n;render()}
 function goToday(){wi=currentWeek();render()}
+function goExam(){if(examIndex>=0){wi=examIndex;render()}}
 render();
 </script>
-
-
-</body></html>
+</body>
+</html>

@@ -733,15 +733,19 @@ days:[
 ];
 
 const today=new Date();
-function ds(d){return d.toISOString().slice(0,10)}
+// 日付はすべて端末のローカル日付で扱う（UTCずれで今週が見つからない問題の対策）
+function pd(s){const a=s.split('-');return new Date(+a[0],+a[1]-1,+a[2])}
+function ds(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function currentWeek(){
-let idx=0;
-WEEKS.forEach((w,i)=>{
-const m=new Date(w.monday);
-const f=new Date(m);f.setDate(f.getDate()+6);
-if(today>=m&&today<=f) idx=i;
-});
-return idx;
+const t=ds(today);
+for(let i=0;i<WEEKS.length;i++){
+const m=pd(WEEKS[i].monday);
+const f=new Date(m.getFullYear(),m.getMonth(),m.getDate()+6);
+if(t>=ds(m)&&t<=ds(f)) return i;
+}
+// 授業のない期間（夏休みなど）は、次に始まる週。全部過ぎていたら最後の週
+for(let i=0;i<WEEKS.length;i++){ if(ds(pd(WEEKS[i].monday))>t) return i; }
+return WEEKS.length-1;
 }
 let wi=currentWeek();
 const examIndex=WEEKS.findIndex(w=>w.exam);
@@ -757,7 +761,7 @@ document.getElementById('bn').disabled=wi===WEEKS.length-1;
 document.getElementById('exambanner').style.display=w.exam?'block':'none';
 
 const active=w.days.filter(d=>{
-const dow=new Date(d.date).getDay();
+const dow=pd(d.date).getDay();
 return (dow>=1&&dow<=5)||(dow===6&&d.classes.length>0);
 });
 
@@ -771,7 +775,7 @@ g.style.gridTemplateColumns=`32px repeat(${active.length},1fr)`;
 
 g.appendChild(document.createElement('div'));
 active.forEach(d=>{
-const dt=new Date(d.date);
+const dt=pd(d.date);
 const el=document.createElement('div');
 el.className='dh'+(ds(dt)===ds(today)?' today':'')+(w.exam?' examdh':'');
 el.innerHTML=`${DN[dt.getDay()-1]}<br>${dt.getMonth()+1}/${dt.getDate()}`;
@@ -841,7 +845,7 @@ g.appendChild(cell);
 }
 
 function sm(subj,time,date,remote){
-const dt=new Date(date);
+const dt=pd(date);
 const tm=TM[time]||{l:'',t:time};
 document.getElementById('mt').textContent=subj;
 document.getElementById('md').textContent=`${dt.getMonth()+1}月${dt.getDate()}日（${DN[dt.getDay()-1]}）`;
@@ -852,7 +856,7 @@ else{st.textContent='🟢 通常通り実施';st.style.background='var(--green-b
 document.getElementById('ov').style.display='flex';
 }
 function smExam(c,date){
-const dt=new Date(date);
+const dt=pd(date);
 document.getElementById('mt').textContent=c.subj;
 document.getElementById('md').textContent=`${dt.getMonth()+1}月${dt.getDate()}日（${DN[dt.getDay()-1]}）`;
 document.getElementById('mti').textContent=`${c.time}〜${c.end}（${c.dur}）`;
